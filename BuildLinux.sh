@@ -1,24 +1,12 @@
 #!/bin/bash
-#
-# This script can download and compile dependencies, compile SuperSlicer
-# and optional build a .tgz and an appimage.
-#
-# Original script from SuperSlicer by supermerill https://github.com/supermerill/SuperSlicer
-#
-# Change log:
-#
-# 20 Nov 2023, wschadow, branding and minor changes
-# 01 Jan 2024, wschadow, added build options
-# 08 august 2024, various people, many updates
-#
 
 export ROOT=`pwd`
-export NCORES=`nproc`
+export NCORES=`nproc --all`
 FOUND_GTK2=$(dpkg -l libgtk* | grep gtk2)
 FOUND_GTK3=$(dpkg -l libgtk* | grep gtk-3)
 
 unset name
-while getopts ":hwdrigbsyu" opt; do
+while getopts ":dsiuhgb" opt; do
   case ${opt} in
     u )
         UPDATE_LIB="1"
@@ -32,31 +20,18 @@ while getopts ":hwdrigbsyu" opt; do
     s )
         BUILD_SLIC3R="1"
         ;;
-    t)
-        BUILD_TESTS="1"
-        ;;
     b )
         BUILD_DEBUG="1"
         ;;
     g )
         FOUND_GTK3=""
         ;;
-    w )
-        BUILD_WIPE="1"
-        ;;
-    r )
-        BUILD_CLEANDEPEND="1"
-        ;;
-    h ) echo "Usage: ./BuildLinux.sh [-h][-w][-d][-r][-i][-g][-b][-s][-t][-u]"
-        echo "   -h: this message"
-        echo "   -w: wipe build directories before building"
-        echo "   -d: build deps (optional)"
-        echo "   -r: clean dependencies building files (reduce disk usage)"
+    h ) echo "Usage: ./BuildLinux.sh [-i][-u][-d][-s][-b][-g]"
         echo "   -i: Generate appimage (optional)"
         echo "   -g: force gtk2 build"
-        echo "   -b: build with debug symbols"
-        echo "   -s: build Slic3r/SuperSlicer"
-        echo "   -t: build tests (in combination with -s)"
+        echo "   -b: build in debug mode"
+        echo "   -d: build deps (optional)"
+        echo "   -s: build slic3r (optional)"
         echo "   -u: only update clock & dependency packets (optional and need sudo)"
         echo "For a first use, you want to 'sudo ./BuildLinux.sh -u'"
         echo "   and then './BuildLinux.sh -dsi'"
@@ -67,16 +42,12 @@ done
 
 if [ $OPTIND -eq 1 ]
 then
-    echo "Usage: ./BuildLinux.sh [-h][-w][-d][-r][-i][-g][-b][-s][-t][-u]"
-    echo "   -h: this message"
-    echo "   -w: wipe build directories before building"
-    echo "   -d: build deps (optional)"
-    echo "   -r: clean dependencies building files (reduce disk usage)"
+    echo "Usage: ./BuildLinux.sh [-i][-u][-d][-s][-b][-g]"
     echo "   -i: Generate appimage (optional)"
     echo "   -g: force gtk2 build"
-    echo "   -b: build with debug symbols"
-    echo "   -s: build Slic3r/SuperSlicer"
-    echo "   -t: build tests (in combination with -s)"
+    echo "   -b: build in debug mode"
+    echo "   -d: build deps (optional)"
+    echo "   -s: build slic3r (optional)"
     echo "   -u: only update clock & dependency packets (optional and need sudo)"
     echo "For a first use, you want to 'sudo ./BuildLinux.sh -u'"
     echo "   and then './BuildLinux.sh -dsi'"
@@ -164,17 +135,6 @@ fi
 
 if [[ -n "$BUILD_DEPS" ]]
 then
-    if [[ -n $BUILD_WIPE ]]
-    then
-       echo -e "\n wiping deps/build directory ...\n"
-       rm -fr deps/build
-       echo -e " ... done\n"
-    fi
-    # mkdir in deps
-    if [ ! -d "deps/build" ]
-    then
-        mkdir deps/build
-    fi
     echo "[3/9] Configuring dependencies..."
     BUILD_ARGS=""
     if [[ -n "$FOUND_GTK3_DEV" ]]
@@ -207,26 +167,18 @@ then
         pushd destdir/usr/local/lib
             if [[ -z "$FOUND_GTK3_DEV" ]]
             then
-                cp libwxscintilla-3.2.a libwx_gtk2u_scintilla-3.2.a
+                cp libwxscintilla-3.1.a libwx_gtk2u_scintilla-3.1.a
             else
-                cp libwxscintilla-3.2.a libwx_gtk3u_scintilla-3.2.a
+                cp libwxscintilla-3.1.a libwx_gtk3u_scintilla-3.1.a
             fi
         popd
         echo "done"
         
+        # clean deps
+        echo "[6/9] Cleaning dependencies..."
+        rm -rf dep_*
     popd
     echo "done"
-fi
-
-# clean deps
-if [[ -n "$BUILD_CLEANDEPEND" ]]
-then
-    echo -e "[6/9] Cleaning dependencies...\n"
-    pushd deps/build
-    pwd
-    rm -fr dep_*
-    popd > /dev/null
-    echo -e "\n ... done\n"
 fi
 
 if [[ -n "$BUILD_SLIC3R" ]]
@@ -240,12 +192,6 @@ then
     if [[ -n "$BUILD_DEBUG" ]]
     then
         BUILD_ARGS="${BUILD_ARGS} -DCMAKE_BUILD_TYPE=Debug"
-    fi
-    if [[ -n "$BUILD_TESTS" ]]
-    then
-        BUILD_ARGS="${BUILD_ARGS} -DCMAKE_BUILD_TESTS=1"
-    else
-        BUILD_ARGS="${BUILD_ARGS} -DCMAKE_BUILD_TESTS=0"
     fi
     
     # cmake
@@ -265,9 +211,7 @@ then
         
         # make OCCTWrapper.so
         make OCCTWrapper
-        
-        # update the pot
-        make gettext_make_pot
+    
     popd
     echo "done"
 fi
