@@ -253,7 +253,7 @@ if (MSVC)
     # Experimental
     #list(APPEND _dep_list "dep_qhull")
 else()
-    list(APPEND _dep_list "dep_Qhull")
+    #list(APPEND _dep_list "dep_Qhull")
     # Not working, static build has different Eigen
     #list(APPEND _dep_list "dep_libigl")
 endif()
