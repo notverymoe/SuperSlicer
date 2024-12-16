@@ -3,8 +3,10 @@
 
 #include "../wxExtensions.hpp"
 
-struct Slic3r::GraphData;
-struct Slic3r::GraphSettings;
+namespace Slic3r {
+    struct GraphData;
+    struct GraphSettings;
+} // namespace Slic3r
 
 class GraphBitmapButton : public wxBitmapButton
 {
