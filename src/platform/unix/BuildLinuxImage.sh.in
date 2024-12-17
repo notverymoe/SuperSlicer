@@ -95,6 +95,7 @@ then
     then
        tar -czvf ../@SLIC3R_APP_KEY@${VERSION_NUMBER}-linux-x64-GTK2.tgz .  &>/dev/null
     elif [[ "$GTK_VERSION" == 3 ]]
+    then
        tar -czvf ../@SLIC3R_APP_KEY@${VERSION_NUMBER}-linux-x64-GTK3.tgz .  &>/dev/null
     else
         echo -e "\nError, only GTK2 and GTK3 verison are supported. Asked GTK version: '$GTK_VERSION'\n"
@@ -115,9 +116,10 @@ then
     then
         mv package/"@SLIC3R_APP_KEY@_ubu64.AppImage" "@SLIC3R_APP_KEY@${VERSION_NUMBER}-linux-x64-GTK2.AppImage"
     elif [[ "$GTK_VERSION" == 3 ]]
+    then
         mv package/"@SLIC3R_APP_KEY@_ubu64.AppImage" "@SLIC3R_APP_KEY@${VERSION_NUMBER}-linux-x64-GTK3.AppImage"
     else
-        echo -e "\nError, only GTK2 and GTK3 verison are supported. Asked GTK version: 
+        echo -e "\nError, only GTK2 and GTK3 verison are supported. Asked GTK version: "
     fi
     echo -e "\n... done\n"
 fi
