@@ -370,6 +370,7 @@ then
     chmod 755 $ROOT/build/src/BuildLinuxImage.sh
 
     pushd build  > /dev/null
+    echo "\n[8/9] launch ${ROOT}/build/src/BuildLinuxImage.sh -a -g ${GTK_VERSION}"
     $ROOT/build/src/BuildLinuxImage.sh -a -g $GTK_VERSION
     popd  > /dev/null
     echo "> ls ROOT"

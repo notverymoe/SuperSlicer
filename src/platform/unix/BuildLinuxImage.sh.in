@@ -21,6 +21,7 @@ fi
 export ROOT=`pwd`
 export NCORES=`nproc`
 
+GTK_VERSION="3"
 VERSION_NUMBER=""
 while getopts ":iagvhg:" opt; do
   case ${opt} in
@@ -32,6 +33,7 @@ while getopts ":iagvhg:" opt; do
         ;;
     g )
         GTK_VERSION=$OPTARG
+        echo "GTK_VERSION=${GTK_VERSION}"
         ;;
     v )
         export VERSION_NUMBER="-@SLIC3R_VERSION_FULL@"
@@ -119,7 +121,7 @@ then
     then
         mv package/"@SLIC3R_APP_KEY@_ubu64.AppImage" "@SLIC3R_APP_KEY@${VERSION_NUMBER}-linux-x64-GTK3.AppImage"
     else
-        echo -e "\nError, only GTK2 and GTK3 verison are supported. Asked GTK version: "
+        echo -e "\nError, only GTK2 and GTK3 verison are supported. Asked GTK version: ${GTK_VERSION}"
     fi
     echo -e "\n... done\n"
 fi
