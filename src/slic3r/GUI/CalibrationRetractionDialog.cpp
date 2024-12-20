@@ -105,8 +105,8 @@ void CalibrationRetractionDialog::create_geometry(wxCommandEvent& event_args) {
         return;
     // wait for slicing end if needed
     wxGetApp().Yield();
-
-    //GLCanvas3D::set_warning_freeze(true);
+    
+    std::unique_ptr<wxWindowUpdateLocker> freeze_gui = std::make_unique<wxWindowUpdateLocker>(this);
     bool autocenter = gui_app->app_config->get("autocenter") == "1";
     if (autocenter) {
         //disable aut-ocenter for this calibration.
@@ -200,19 +200,8 @@ void CalibrationRetractionDialog::create_geometry(wxCommandEvent& event_args) {
     }
 
     /// --- translate ---;
-    bool has_to_arrange = plat->config()->opt_float("init_z_rotate") != 0;
-    const ConfigOptionFloat* extruder_clearance_radius = print_config->option<ConfigOptionFloat>("extruder_clearance_radius");
-    const ConfigOptionPoints* bed_shape = printer_config->option<ConfigOptionPoints>("bed_shape");
+    bool has_to_arrange = true;
     const float brim_width = std::max(print_config->option<ConfigOptionFloat>("brim_width")->value, nozzle_diameter * 5.);
-    Vec2d bed_size = BoundingBoxf(bed_shape->get_values()).size();
-    Vec2d bed_min = BoundingBoxf(bed_shape->get_values()).min;
-    float offset = 4 + 26 * scale * 1 + extruder_clearance_radius->value + brim_width + (brim_width > extruder_clearance_radius->value ? brim_width - extruder_clearance_radius->value : 0);
-    if (nb_items == 1) {
-        model.objects[objs_idx[0]]->translate({ bed_min.x() + bed_size.x() / 2, bed_min.y() + bed_size.y() / 2, zscale_number });
-    } else {
-        has_to_arrange = true;
-    }
-
 
     /// --- custom config ---
     assert(filament_temp_item_name.size() == nb_items);
@@ -279,7 +268,7 @@ void CalibrationRetractionDialog::create_geometry(wxCommandEvent& event_args) {
     //update everything, easier to code.
     ObjectList* obj = this->gui_app->obj_list();
     obj->update_after_undo_redo();
-
+    freeze_gui.reset();
     // arrange if needed, after new settings, to take them into account
     if (has_to_arrange) {
         //update print config (done at reslice but we need it here)

@@ -58,8 +58,8 @@ void CalibrationBridgeDialog::create_geometry(std::string setting_to_test, bool 
         return;
     // wait for slicing end if needed
     wxGetApp().Yield();
-
-    //GLCanvas3D::set_warning_freeze(true);
+    
+    std::unique_ptr<wxWindowUpdateLocker> freeze_gui = std::make_unique<wxWindowUpdateLocker>(this);
     bool autocenter = gui_app->app_config->get("autocenter") == "1";
     if (autocenter) {
         //disable auto-center for this calibration.
@@ -126,21 +126,8 @@ void CalibrationBridgeDialog::create_geometry(std::string setting_to_test, bool 
         }
     }
     /// --- translate ---;
-    bool has_to_arrange = init_z_rotate_angle != 0;
+    bool has_to_arrange = true;
     const float brim_width = std::max(print_config->option<ConfigOptionFloat>("brim_width")->value, nozzle_diameter * 5.);
-    const ConfigOptionFloat* extruder_clearance_radius = print_config->option<ConfigOptionFloat>("extruder_clearance_radius");
-    const ConfigOptionPoints* bed_shape = printer_config->option<ConfigOptionPoints>("bed_shape");
-    Vec2d bed_size = BoundingBoxf(bed_shape->get_values()).size();
-    Vec2d bed_min = BoundingBoxf(bed_shape->get_values()).min;
-    float offsety = 2 + 10 * 1 + extruder_clearance_radius->value + brim_width + (brim_width > extruder_clearance_radius->value ? brim_width - extruder_clearance_radius->value : 0);
-    model.objects[objs_idx[0]]->translate({ bed_min.x() + bed_size.x() / 2, bed_min.y() + bed_size.y() / 2, 2.5 * z_scale });
-    for (int i = 1; i < nb_items; i++) {
-        model.objects[objs_idx[i]]->translate({ bed_min.x() + bed_size.x() / 2, bed_min.y() + bed_size.y() / 2 + (i % 2 == 0 ? -1 : 1) * offsety * ((i + 1) / 2), 2.5 * z_scale });
-    }
-    // if not enough space, forget about complete_objects
-    if (bed_size.y() < offsety * (nb_items + 1))
-        has_to_arrange = true;
-
 
     /// --- main config, please modify object config when possible ---
     DynamicPrintConfig new_print_config = *print_config; //make a copy
@@ -190,7 +177,7 @@ void CalibrationBridgeDialog::create_geometry(std::string setting_to_test, bool 
     //update everything, easier to code.
     ObjectList* obj = this->gui_app->obj_list();
     obj->update_after_undo_redo();
-
+    freeze_gui.reset();
     // arrange if needed, after new settings, to take them into account
     if (has_to_arrange) {
         //update print config (done at reslice but we need it here)

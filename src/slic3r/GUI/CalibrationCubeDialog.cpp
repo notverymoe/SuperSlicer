@@ -26,15 +26,17 @@ namespace GUI {
 
 void CalibrationCubeDialog::create_buttons(wxStdDialogButtonSizer* buttons){
     wxString choices_scale[] = { "10", "20", "30", "40" };
-    scale = new wxComboBox(this, wxID_ANY, wxString{ "20" }, wxDefaultPosition, wxDefaultSize, 4, choices_scale);
+    //scale = new wxComboBox(this, wxID_ANY, wxString{ "20" }, wxDefaultPosition, wxDefaultSize, 4, choices_scale);
+    scale = new ComboBox(this, wxID_ANY, wxString{"20"}, wxDefaultPosition, wxSize{60,-1}, 4, choices_scale);
     scale->SetToolTip(_L("You can choose the dimension of the cube."
         " It's a simple scale, you can modify it in the right panel yourself if you prefer. It's just quicker to select it here."));
     scale->SetSelection(1);
-    wxString choices_goal[] = { "Dimensional accuracy (default)" , "infill/perimeter overlap"/*, "external perimeter overlap"*/};
-    calibrate = new wxComboBox(this, wxID_ANY, _L("Dimensional accuracy (default)"), wxDefaultPosition, wxDefaultSize, 2, choices_goal);
+    wxString choices_goal[] = { "Dimensional accuracy (default)" , "infill/perimeters encroachment"/*, "external perimeter overlap"*/};
+    //calibrate = new wxComboBox(this, wxID_ANY, _L("Dimensional accuracy (default)"), wxDefaultPosition, wxDefaultSize, 2, choices_goal);
+    calibrate = new ComboBox(this, wxID_ANY, _L("Dimensional accuracy (default)"), wxDefaultPosition,  wxSize{120,-1}, 2, choices_goal);
     calibrate->SetToolTip(_L("Select a goal, this will change settings to increase the effects to search."));
     calibrate->SetSelection(0);
-    calibrate->SetEditable(false);
+    //calibrate->SetEditable(false);
 
     buttons->Add(new wxStaticText(this, wxID_ANY, _L("Dimension:")));
     buttons->Add(scale);
@@ -46,7 +48,7 @@ void CalibrationCubeDialog::create_buttons(wxStdDialogButtonSizer* buttons){
 
     wxButton* bt = new wxButton(this, wxID_FILE1, _(L("Standard Cube")));
     bt->Bind(wxEVT_BUTTON, &CalibrationCubeDialog::create_geometry_standard, this);
-    bt->SetToolTip(_L("Standard cubic xyz cube, with a flat top. Better for infill/perimeter overlap calibration."));
+    bt->SetToolTip(_L("Standard cubic xyz cube, with a flat top. Better for infill/perimeters encroachment calibration."));
     buttons->Add(bt);
     buttons->AddSpacer(10);
     bt = new wxButton(this, wxID_FILE1, _(L("Voron Cube")));
@@ -62,8 +64,8 @@ void CalibrationCubeDialog::create_geometry(std::string calibration_path) {
         return;
     // wait for slicing end if needed
     wxGetApp().Yield();
-
-    //GLCanvas3D::set_warning_freeze(true);
+    
+    std::unique_ptr<wxWindowUpdateLocker> freeze_gui = std::make_unique<wxWindowUpdateLocker>(this);
     std::vector<size_t> objs_idx = plat->load_files(std::vector<std::string>{
             (boost::filesystem::path(Slic3r::resources_dir()) / "calibration"/"cube"/ calibration_path).string()}, true, false, false, false);
 
@@ -91,10 +93,6 @@ void CalibrationCubeDialog::create_geometry(std::string calibration_path) {
 
 
     /// --- translate ---
-    const ConfigOptionPoints* bed_shape = printerConfig->option<ConfigOptionPoints>("bed_shape");
-    Vec2d bed_size = BoundingBoxf(bed_shape->get_values()).size();
-    Vec2d bed_min = BoundingBoxf(bed_shape->get_values()).min;
-    model.objects[objs_idx[0]]->translate({ bed_min.x() + bed_size.x() / 2, bed_min.y() + bed_size.y() / 2, 0 });
 
     /// --- custom config ---
     int idx_goal = calibrate->GetSelection();
@@ -113,7 +111,7 @@ void CalibrationCubeDialog::create_geometry(std::string calibration_path) {
     //update everything, easier to code.
     ObjectList* obj = this->gui_app->obj_list();
     obj->update_after_undo_redo();
-
+    freeze_gui.reset();
 
     plat->reslice();
 
