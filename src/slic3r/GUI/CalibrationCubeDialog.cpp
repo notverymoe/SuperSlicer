@@ -33,16 +33,16 @@ void CalibrationCubeDialog::create_buttons(wxStdDialogButtonSizer* buttons){
     scale->SetSelection(1);
     wxString choices_goal[] = { "Dimensional accuracy (default)" , "infill/perimeters encroachment"/*, "external perimeter overlap"*/};
     //calibrate = new wxComboBox(this, wxID_ANY, _L("Dimensional accuracy (default)"), wxDefaultPosition, wxDefaultSize, 2, choices_goal);
-    calibrate = new ComboBox(this, wxID_ANY, _L("Dimensional accuracy (default)"), wxDefaultPosition,  wxSize{120,-1}, 2, choices_goal);
+    calibrate = new ComboBox(this, wxID_ANY, _L("Dimensional accuracy (default)"), wxDefaultPosition,  wxSize{240,-1}, 2, choices_goal);
     calibrate->SetToolTip(_L("Select a goal, this will change settings to increase the effects to search."));
     calibrate->SetSelection(0);
     //calibrate->SetEditable(false);
 
-    buttons->Add(new wxStaticText(this, wxID_ANY, _L("Dimension:")));
+    buttons->Add(new wxStaticText(this, wxID_ANY, _L("Dimension:") + " "));
     buttons->Add(scale);
-    buttons->Add(new wxStaticText(this, wxID_ANY, _L("mm")));
+    buttons->Add(new wxStaticText(this, wxID_ANY, wxString(" ") + _L("mm")));
     buttons->AddSpacer(40);
-    buttons->Add(new wxStaticText(this, wxID_ANY, _L("Goal:")));
+    buttons->Add(new wxStaticText(this, wxID_ANY, _L("Goal:") + " "));
     buttons->Add(calibrate);
     buttons->AddSpacer(40);
 
@@ -51,7 +51,7 @@ void CalibrationCubeDialog::create_buttons(wxStdDialogButtonSizer* buttons){
     bt->SetToolTip(_L("Standard cubic xyz cube, with a flat top. Better for infill/perimeters encroachment calibration."));
     buttons->Add(bt);
     buttons->AddSpacer(10);
-    bt = new wxButton(this, wxID_FILE1, _(L("Voron Cube")));
+    bt = new wxButton(this, wxID_FILE2, _(L("Voron Cube")));
     bt->Bind(wxEVT_BUTTON, &CalibrationCubeDialog::create_geometry_voron, this);
     bt->SetToolTip(_L("Voron cubic cube with many features inside, with a bearing slot on top. Better to check dimensional accuracy."));
     buttons->Add(bt);

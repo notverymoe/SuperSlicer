@@ -28,10 +28,11 @@ namespace GUI {
 
 void CalibrationOverBridgeDialog::create_buttons(wxStdDialogButtonSizer* buttons){
     wxButton* bt1 = new wxButton(this, wxID_FILE1, _L("'Above the Bridges' flow calibration"));
-    wxButton* bt2 = new wxButton(this, wxID_FILE1, _L("'Top Fill' flow calibration"));
+    wxButton* bt2 = new wxButton(this, wxID_FILE2, _L("'Top Fill' flow calibration"));
     bt1->Bind(wxEVT_BUTTON, &CalibrationOverBridgeDialog::create_geometry1, this);
     bt2->Bind(wxEVT_BUTTON, &CalibrationOverBridgeDialog::create_geometry2, this);
     buttons->Add(bt1);
+    buttons->AddSpacer(20);
     buttons->Add(bt2);
 }
 
