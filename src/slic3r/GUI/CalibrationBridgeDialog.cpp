@@ -26,13 +26,16 @@ static wxSize get_screen_size(wxWindow* window)
 namespace Slic3r {
 namespace GUI {
 
-void CalibrationBridgeDialog::create_buttons(wxStdDialogButtonSizer* buttons){
+void CalibrationBridgeDialog::create_buttons(wxStdDialogButtonSizer* buttons) {
+    const wxSize size(6 * em_unit(), wxDefaultCoord);
     wxString choices_steps[] = { "5","10","15" };
-    steps = new wxComboBox(this, wxID_ANY, wxString{ "10" }, wxDefaultPosition, wxDefaultSize, 3, choices_steps);
+    //steps = new wxComboBox(this, wxID_ANY, wxString{ "10" }, wxDefaultPosition, wxDefaultSize, 3, choices_steps);
+    steps = new ComboBox(this, wxID_ANY, wxString{ "10" }, wxDefaultPosition, size, 3, choices_steps);
     steps->SetToolTip(_L("Select the step in % between two tests.\nNote that only multiple of 5 are engraved on the parts."));
     steps->SetSelection(1);
     wxString choices_nb[] = { "1","2","3","4","5","6" };
-    nb_tests = new wxComboBox(this, wxID_ANY, wxString{ "5" }, wxDefaultPosition, wxDefaultSize, 6, choices_nb);
+    //nb_tests = new wxComboBox(this, wxID_ANY, wxString{ "5" }, wxDefaultPosition, wxDefaultSize, 6, choices_nb);
+    nb_tests = new ComboBox(this, wxID_ANY, wxString{ "5" }, wxDefaultPosition, size, 6, choices_nb);
     nb_tests->SetToolTip(_L("Select the number of tests"));
     nb_tests->SetSelection(4);
 
@@ -46,7 +49,7 @@ void CalibrationBridgeDialog::create_buttons(wxStdDialogButtonSizer* buttons){
     bt->Bind(wxEVT_BUTTON, &CalibrationBridgeDialog::create_geometry_flow_ratio, this);
     buttons->Add(bt);
     //buttons->AddSpacer(15);
-    //bt = new wxButton(this, wxID_FILE1, _(L("Test Overlap")));
+    //bt = new wxButton(this, wxID_FILE2, _(L("Test Overlap")));
     //bt->Bind(wxEVT_BUTTON, &CalibrationBridgeDialog::create_geometry_overlap, this);
     //buttons->Add(bt);
 }
