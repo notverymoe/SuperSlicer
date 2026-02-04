@@ -18,6 +18,8 @@ else()
 	include("version.inc")
 endif()
 set(BOOST_VERBOSE YES)
+set(Boost_VERBOSE 1)
+set(Boost_DEBUG 1)
 include(GNUInstallDirs)
 include(CMakeDependentOption)
 
