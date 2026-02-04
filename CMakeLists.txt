@@ -17,6 +17,7 @@ else()
 	message(STATUS "Warning: cannot find file 'version.date.inc', using template 'version.inc' instead.")
 	include("version.inc")
 endif()
+set(BOOST_VERBOSE YES)
 include(GNUInstallDirs)
 include(CMakeDependentOption)
 
